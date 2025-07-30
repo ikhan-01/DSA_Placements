@@ -1,0 +1,359 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>AVL Tree Visualizer</title>
+</head>
+<body style="font-family: sans-serif; padding: 20px; height: 100vh; display: flex; flex-direction: column;">
+
+  <h2>🌲 AVL Tree Visualizer</h2>
+
+  <div class="toolbar" style="margin-top: 10px; display: flex; flex-wrap: wrap; gap: 10px; align-items: center;">
+  <input type="number" id="valueInput" placeholder="Enter value" style="padding: 6px; width: 120px;" />
+  <button onclick="insertAndRenderAVL()">Insert</button>
+  <button onclick="deleteAndRenderAVL()">Delete</button>
+  <button onclick="undoLastOperation()">Undo</button>
+  <button onclick="resetAVLTree()">Reset Tree</button>
+  <button onclick="clearLog()">Clear Log</button>
+  <button onclick="exportTreeAsJSON()">Export JSON</button>
+  <button onclick="exportTreeAsSVG()">Export SVG</button>
+</div>
+
+  <div id="insertionMessage" style="margin-top: 10px; font-weight: bold;"></div>
+
+  <div style="margin-top: 10px; font-size: 13px; background: #e8f5e9; border-left: 5px solid green; padding: 10px; max-width: 500px;">
+    <strong>Legend:</strong>
+    <ul style="margin: 4px 0 4px 20px; padding-left: 0;">
+      <li><span style="color: red; font-weight: bold;">Red Node</span>: Node involved in current rotation</li>
+      <li><span style="color: black;">➤ Arrows</span>: Point from parent to child</li>
+      <li><span style="font-family: monospace;">(key, balance)</span>: Node value and its balance factor</li>
+    </ul>
+  </div>
+
+  <div style="display: flex; flex: 1; overflow: hidden; margin-top: 20px; gap: 20px; align-items: flex-start;">
+    <div id="avlCanvas" style="flex: 3; overflow: auto; max-height: 600px;"></div>
+    <div id="logPanel" style="flex: 1; max-width: 300px; height: 600px; overflow-y: auto; background: #f8f8f8; border-left: 4px solid #2196f3; padding: 10px; font-family: monospace; font-size: 14px; position: sticky; top: 20px;">
+      <strong>🧾 Log:</strong>
+      <ul id="logList" style="list-style-type: square; padding-left: 20px; margin-top: 10px; flex: 1 1 auto; overflow-y: auto;"></ul>
+    </div>
+  </div>
+
+  <!-- WALKTHROUGH LOGIC -->
+  <script>
+    function explainRotationSteps(type, nodes) {
+      let stepIndex = 0;
+      const container = document.createElement('div');
+      container.style.background = '#fff3cd';
+      container.style.borderLeft = '5px solid #ffc107';
+      container.style.padding = '10px';
+      container.style.marginTop = '10px';
+      container.style.fontSize = '14px';
+      container.innerHTML = `
+        <strong>🔁 ${type} Rotation Walkthrough:</strong><br>
+        <div id='rotationStep'></div>
+        <div style='margin-top: 6px;'>
+          <button id='backRotationStep'>Back</button>
+          <button id='nextRotationStep'>Next Step</button>
+          <button id='closeRotationStep'>Close</button>
+        </div>
+      `;
+
+      const stepText = container.querySelector('#rotationStep');
+      const nextBtn = container.querySelector('#nextRotationStep');
+      const backBtn = container.querySelector('#backRotationStep');
+      const closeBtn = container.querySelector('#closeRotationStep');
+
+      stepText.innerText = nodes[0];
+
+      nextBtn.onclick = () => {
+        stepIndex++;
+        if (stepIndex < nodes.length) {
+          stepText.innerText = nodes[stepIndex];
+        } else {
+          stepText.innerText = '✅ Rotation complete!';
+          nextBtn.disabled = true;
+        }
+      };
+
+      backBtn.onclick = () => {
+        if (stepIndex > 0) {
+          stepIndex--;
+          stepText.innerText = nodes[stepIndex];
+          nextBtn.disabled = false;
+        }
+      };
+
+      closeBtn.onclick = () => {
+        container.remove();
+      };
+
+      const prevMsg = document.querySelector('#rotationExplainBox');
+      if (prevMsg) prevMsg.remove();
+      container.id = 'rotationExplainBox';
+      document.getElementById('insertionMessage').insertAdjacentElement('afterend', container);
+    }
+  </script>
+
+<script>
+// ---------------- AVL TREE NODE CLASS ----------------
+class AVLNode {
+  constructor(value) {
+    this.value = value;
+    this.left = null;
+    this.right = null;
+    this.height = 1;
+  }
+}
+
+let avlRoot = null;
+let history = [];
+
+function getHeight(node) {
+  return node ? node.height : 0;
+}
+
+function getBalance(node) {
+  return node ? getHeight(node.left) - getHeight(node.right) : 0;
+}
+
+function updateHeight(node) {
+  node.height = 1 + Math.max(getHeight(node.left), getHeight(node.right));
+}
+
+function rotateRight(y) {
+  const x = y.left;
+  const T2 = x.right;
+  x.right = y;
+  y.left = T2;
+  updateHeight(y);
+  updateHeight(x);
+  log(`Performed Right Rotation on node ${y.value}`);
+  explainRotationSteps("Right Rotation", [
+    `Before rotation: ${y.value}`,
+    `Right rotate ${y.value}`,
+    `New root: ${x.value}`
+  ]);
+  return x;
+}
+
+function rotateLeft(x) {
+  const y = x.right;
+  const T2 = y.left;
+  y.left = x;
+  x.right = T2;
+  updateHeight(x);
+  updateHeight(y);
+  log(`Performed Left Rotation on node ${x.value}`);
+  explainRotationSteps("Left Rotation", [
+    `Before rotation: ${x.value}`,
+    `Left rotate ${x.value}`,
+    `New root: ${y.value}`
+  ]);
+  return y;
+}
+
+function insertAVL(node, key) {
+  if (!node) return new AVLNode(key);
+  if (key < node.value) node.left = insertAVL(node.left, key);
+  else if (key > node.value) node.right = insertAVL(node.right, key);
+  else return node; // no duplicates
+
+  updateHeight(node);
+  const balance = getBalance(node);
+
+  // LL
+  if (balance > 1 && key < node.left.value) return rotateRight(node);
+  // RR
+  if (balance < -1 && key > node.right.value) return rotateLeft(node);
+  // LR
+  if (balance > 1 && key > node.left.value) {
+    node.left = rotateLeft(node.left);
+    return rotateRight(node);
+  }
+  // RL
+  if (balance < -1 && key < node.right.value) {
+    node.right = rotateRight(node.right);
+    return rotateLeft(node);
+  }
+
+  return node;
+}
+
+function renderAVLTree(root) {
+  const nodeRadius = 20;
+  let svg = '';
+  let ySpacing = 80;
+  const positions = new Map();
+
+  let counter = 0;
+  function computePos(node, depth) {
+    if (!node) return;
+    computePos(node.left, depth + 1);
+    const x = 80 + counter * 70;
+    const y = 50 + depth * ySpacing;
+    positions.set(node, { x, y });
+    counter++;
+    computePos(node.right, depth + 1);
+  }
+
+  function draw(node) {
+    if (!node) return;
+    const { x, y } = positions.get(node);
+    const balance = getBalance(node);
+    const display = `${node.value}
+(${balance})`;
+    svg += `<circle cx='${x}' cy='${y}' r='${nodeRadius}' fill='lightblue' stroke='black' stroke-width='2' />`;
+    svg += `<text x='${x}' y='${y + 5}' text-anchor='middle' font-size='12'>${display}</text>`;
+    if (node.left) {
+      const { x: x2, y: y2 } = positions.get(node.left);
+      svg += `<line x1='${x}' y1='${y}' x2='${x2}' y2='${y2}' stroke='black' />`;
+    }
+    if (node.right) {
+      const { x: x2, y: y2 } = positions.get(node.right);
+      svg += `<line x1='${x}' y1='${y}' x2='${x2}' y2='${y2}' stroke='black' />`;
+    }
+    draw(node.left);
+    draw(node.right);
+  }
+
+  computePos(root, 0);
+  draw(root);
+  return svg;
+}
+
+function insertAndRenderAVL() {
+  const val = parseInt(document.getElementById('valueInput').value);
+  if (isNaN(val)) return;
+  history.push(JSON.stringify(avlRoot));
+  avlRoot = insertAVL(avlRoot, val);
+  const svg = `<svg width='1000' height='600'>${renderAVLTree(avlRoot)}</svg>`;
+  document.getElementById('avlCanvas').innerHTML = svg;
+  document.getElementById('valueInput').value = '';
+  log(`Inserted ${val}`);
+}
+
+function log(text) {
+  const entry = document.createElement('li');
+  entry.textContent = text;
+  document.getElementById('logList').appendChild(entry);
+}
+
+function clearLog() {
+  document.getElementById('logList').innerHTML = '';
+}
+
+function undoLastOperation() {
+  if (history.length > 0) {
+    avlRoot = JSON.parse(history.pop(), nodeReviver);
+    const svg = `<svg width='1000' height='600'>${renderAVLTree(avlRoot)}</svg>`;
+    document.getElementById('avlCanvas').innerHTML = svg;
+    log('Undo last operation');
+  }
+}
+
+function nodeReviver(key, val) {
+  if (val && typeof val === 'object' && 'value' in val) {
+    const n = new AVLNode(val.value);
+    n.left = val.left;
+    n.right = val.right;
+    n.height = val.height;
+    return n;
+  }
+  return val;
+}
+
+function resetAVLTree() {
+  avlRoot = null;
+  history = [];
+  document.getElementById('avlCanvas').innerHTML = '';
+  clearLog();
+  log('Reset tree');
+}
+
+function exportTreeAsJSON() {
+  const json = JSON.stringify(avlRoot, null, 2);
+  const blob = new Blob([json], { type: 'application/json' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = 'avl_tree.json';
+  a.click();
+  URL.revokeObjectURL(url);
+}
+
+function exportTreeAsSVG() {
+  const svgContent = document.getElementById('avlCanvas').innerHTML;
+  const blob = new Blob([svgContent], { type: 'image/svg+xml' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = 'avl_tree.svg';
+  a.click();
+  URL.revokeObjectURL(url);
+}
+
+// Optional: Add styling to highlight nodes in red during rotation
+function highlightNode(nodeValue) {
+  const circles = document.querySelectorAll('circle');
+  circles.forEach(circle => {
+    const cx = parseFloat(circle.getAttribute('cx'));
+    const cy = parseFloat(circle.getAttribute('cy'));
+    const matchText = document.elementFromPoint(cx, cy + 5);
+    if (matchText && matchText.textContent.startsWith(nodeValue)) {
+      circle.setAttribute('fill', 'red');
+    }
+  });
+}
+
+// Optional: Add support for deletion
+function deleteAndRenderAVL() {
+  const val = parseInt(document.getElementById('valueInput').value);
+  if (isNaN(val)) return;
+  history.push(JSON.stringify(avlRoot));
+  avlRoot = deleteAVL(avlRoot, val);
+  const svg = `<svg width='1000' height='600'>${renderAVLTree(avlRoot)}</svg>`;
+  document.getElementById('avlCanvas').innerHTML = svg;
+  document.getElementById('valueInput').value = '';
+  log(`Deleted ${val}`);
+}
+
+function deleteAVL(root, key) {
+  if (!root) return root;
+  if (key < root.value) root.left = deleteAVL(root.left, key);
+  else if (key > root.value) root.right = deleteAVL(root.right, key);
+  else {
+    if (!root.left || !root.right) {
+      const temp = root.left || root.right;
+      if (!temp) return null;
+      else return temp;
+    } else {
+      let temp = root.right;
+      while (temp.left) temp = temp.left;
+      root.value = temp.value;
+      root.right = deleteAVL(root.right, temp.value);
+    }
+  }
+
+  updateHeight(root);
+  const balance = getBalance(root);
+
+  // LL
+  if (balance > 1 && getBalance(root.left) >= 0) return rotateRight(root);
+  // LR
+  if (balance > 1 && getBalance(root.left) < 0) {
+    root.left = rotateLeft(root.left);
+    return rotateRight(root);
+  }
+  // RR
+  if (balance < -1 && getBalance(root.right) <= 0) return rotateLeft(root);
+  // RL
+  if (balance < -1 && getBalance(root.right) > 0) {
+    root.right = rotateRight(root.right);
+    return rotateLeft(root);
+  }
+
+  return root;
+}
+</script>
+</body>
+</html>

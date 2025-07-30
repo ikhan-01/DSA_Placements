@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Placement-Focused Linked Lists Page</title>
+  <link rel="stylesheet" href="cssDSA.css">
+ 
+</head>
+<body>
+<div class="sidebar">
+  <h2>Linked List Topics</h2>
+  <a href="#insert">Insertion at Head/Tail</a>
+  <a href="#traverse">Traversal</a>
+  <a href="#loop">Detect Loop</a>
+  <a href="#reverse">Reverse Linked List</a>
+  <a href="#middle">Find Middle Node</a>
+  <a href="#mock1">Mock Interview 1</a>
+  <a href="#mock2">Mock Interview 2</a>
+</div>
+
+<div class="content" id="printable-content">
+ 
+<button class="print-button" onclick="window.print()">🖨️ Print</button>
+  <h1>Placement Preparation: Linked Lists</h1>
+
+  <h2 id="insert">Insertion at Head/Tail</h2>
+  <p><strong>Problem Statement:</strong> Implement insertion at the head and tail of a singly linked list.</p>
+  <pre><code>class Node:
+    def __init__(self, data):
+        self.data = data
+        self.next = None
+
+class LinkedList:
+    def __init__(self):
+        self.head = None
+
+    def insert_head(self, data):
+        new_node = Node(data)
+        new_node.next = self.head
+        self.head = new_node
+
+    def insert_tail(self, data):
+        new_node = Node(data)
+        if not self.head:
+            self.head = new_node
+            return
+        temp = self.head
+        while temp.next:
+            temp = temp.next
+        temp.next = new_node</code></pre>
+  <div class="explanation">Time: O(1) for head, O(n) for tail; Space: O(1)</div>
+
+  <h2 id="traverse">Traversal</h2>
+  <p><strong>Problem Statement:</strong> Traverse and print the elements of a linked list.</p>
+  <pre><code>def traverse(head):
+    current = head
+    while current:
+        print(current.data, end=' -> ')
+        current = current.next
+    print("None")</code></pre>
+  <div class="explanation">Time: O(n), Space: O(1)</div>
+
+  <h2 id="loop">Detect Loop</h2>
+  <p><strong>Problem Statement:</strong> Detect whether a loop exists in the linked list.</p>
+  <pre><code>def has_loop(head):
+    slow = fast = head
+    while fast and fast.next:
+        slow = slow.next
+        fast = fast.next.next
+        if slow == fast:
+            return True
+    return False</code></pre>
+  <div class="explanation">Floyd’s Cycle Detection<br>Time: O(n), Space: O(1)</div>
+
+  <h2 id="reverse">Reverse Linked List</h2>
+  <p><strong>Problem Statement:</strong> Reverse a singly linked list.</p>
+  <pre><code>def reverse_list(head):
+    prev = None
+    current = head
+    while current:
+        next_node = current.next
+        current.next = prev
+        prev = current
+        current = next_node
+    return prev</code></pre>
+  <div class="explanation">Time: O(n), Space: O(1)</div>
+
+  <h2 id="middle">Find Middle Node</h2>
+  <p><strong>Problem Statement:</strong> Find the middle node of a singly linked list.</p>
+  <pre><code>def find_middle(head):
+    slow = fast = head
+    while fast and fast.next:
+        slow = slow.next
+        fast = fast.next.next
+    return slow</code></pre>
+  <div class="explanation">Time: O(n), Space: O(1)</div>
+
+  <h2 id="mock1">Mock Interview 1</h2>
+  <p><strong>Problem Statement:</strong> Remove duplicates from a sorted linked list.</p>
+  <pre><code>def remove_duplicates(head):
+    current = head
+    while current and current.next:
+        if current.data == current.next.data:
+            current.next = current.next.next
+        else:
+            current = current.next
+    return head</code></pre>
+  <div class="explanation">Time: O(n), Space: O(1)</div>
+
+  <h2 id="mock2">Mock Interview 2</h2>
+  <p><strong>Problem Statement:</strong> Merge two sorted linked lists.</p>
+  <pre><code>def merge_sorted_lists(l1, l2):
+    dummy = Node(0)
+    tail = dummy
+    while l1 and l2:
+        if l1.data < l2.data:
+            tail.next = l1
+            l1 = l1.next
+        else:
+            tail.next = l2
+            l2 = l2.next
+        tail = tail.next
+    tail.next = l1 if l1 else l2
+    return dummy.next</code></pre>
+  <div class="explanation">Time: O(n + m), Space: O(1)</div>
+</div>
+</body>
+</html>

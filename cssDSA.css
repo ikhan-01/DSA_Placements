@@ -1,0 +1,107 @@
+    body {
+      margin: 0;
+      font-family: 'Segoe UI', sans-serif;
+      display: flex;
+      height: 100vh;
+    }
+    h1{
+      font-size: 28px; margin-bottom: 10px; color: #1e88e5;
+    }
+
+    .sidebar {
+      width: 250px;
+      background-color: #1e1e2f;
+      color: white;
+      padding: 20px;
+      box-sizing: border-box;
+    }
+
+    .sidebar h2 {
+      margin-top: 0;
+      font-size: 20px;
+    }
+
+    .sidebar a {
+      display: block;
+      color: #cfcfcf;
+      text-decoration: none;
+      margin: 10px 0;
+      transition: color 0.2s ease;
+    }
+
+    .sidebar a:hover {
+      color: #ffffff;
+    }
+
+    .content {
+      flex: 1;
+      padding: 30px;
+      overflow-y: auto;
+    }
+
+    .content h2 {
+      margin-top: 60px;
+      border-bottom: 2px solid #ccc;
+      padding-bottom: 5px;
+    }
+
+    pre {
+      background: #f4f4f4;
+      padding: 15px;
+      overflow-x: auto;
+      border-radius: 6px;
+    }
+
+    .explanation {
+      background: #e8f0fe;
+      padding: 10px;
+      border-left: 4px solid #4285f4;
+      margin: 20px 0;
+      border-radius: 6px;
+    }
+    .scrollable-div {
+      max-height: 250px;
+      overflow-y: auto;
+      border: 2px solid #666;
+      padding: 15px;
+      background-color: #f5f5f5;
+      border-radius: 6px;
+      position: relative;
+      margin-bottom: 40px;
+    }
+
+    .print-button {
+      position: sticky;
+      bottom: 5px;
+      float: right;
+      padding: 8px 14px;
+      background-color: #007bff;
+      color: #fff;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      margin-top: 10px;
+    }
+
+    @media print {
+      body * {
+      visibility: hidden;
+    }
+  
+    #printable-content, #printable-content * {
+      visibility: visible;
+    }
+  
+    #printable-content {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: auto;
+      overflow: visible;
+    }
+
+    .print-button {
+      display: none;
+    }
+  }

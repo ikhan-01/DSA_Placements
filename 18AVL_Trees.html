@@ -1,0 +1,368 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Placement-Focused: AVL Trees</title>
+  <link rel="stylesheet" href="cssDSA.css">
+</head>
+<body>
+  <div class="sidebar">
+    <h2>AVL Tree Topics</h2>
+    <a href="#basics">AVL Tree Basics</a>
+    <a href="#rotations">AVL Rotations</a>
+    <a href="#rotation-visuals">Rotation Visual Demo</a>
+    <a href="#insertion">AVL Tree Insertion</a>
+    
+    <a href="#deletion">AVL Tree Deletion</a>
+    
+   
+   
+  </div>
+
+  <div class="content" id="printable-content">
+    <button class="print-button" onclick="window.print()">🖨️ Print</button>
+    <h1 style="font-size: 28px; margin-bottom: 10px; color: #1e88e5;">Placement Preparation: AVL Trees</h1>
+
+    <h2 id="basics">AVL Tree Basics</h2>
+<p><strong>Concept:</strong> An AVL Tree is a height-balanced binary search tree, where the difference in height between left and right subtrees is at most 1 for every node. This ensures operations like insert, delete, and search take O(log n) time.</p>
+<div class="testcase"><strong>AVL Property:</strong> Balance Factor = height(left subtree) - height(right subtree) ∈ {-1, 0, 1}</div>
+<pre><code>class Node:
+    def __init__(self, value):
+        self.value = value
+        self.left = None
+        self.right = None
+        self.height = 1
+</code></pre>
+<div class="explanation">Time: O(1) per node creation, Space: O(n) for n nodes.</div>
+
+
+<script>
+class Node {
+  constructor(value) {
+    this.value = value;
+    this.left = null;
+    this.right = null;
+    this.height = 1;
+  }
+}
+
+function height(node) {
+  return node ? node.height : 0;
+}
+
+function updateHeight(node) {
+  node.height = 1 + Math.max(height(node.left), height(node.right));
+}
+
+function getBalance(node) {
+  return node ? height(node.left) - height(node.right) : 0;
+}
+
+function rotateRight(y) {
+  const x = y.left;
+  const T2 = x.right;
+  x.right = y;
+  y.left = T2;
+  updateHeight(y);
+  updateHeight(x);
+  return x;
+}
+
+function rotateLeft(x) {
+  const y = x.right;
+  const T2 = y.left;
+  y.left = x;
+  x.right = T2;
+  updateHeight(x);
+  updateHeight(y);
+  return y;
+}
+
+function insert(root, key) {
+  if (!root) return new Node(key);
+  if (key < root.value) root.left = insert(root.left, key);
+  else if (key > root.value) root.right = insert(root.right, key);
+  else return root;
+
+  updateHeight(root);
+  const balance = getBalance(root);
+
+  if (balance > 1 && key < root.left.value) return rotateRight(root);
+  if (balance < -1 && key > root.right.value) return rotateLeft(root);
+  if (balance > 1 && key > root.left.value) {
+    root.left = rotateLeft(root.left);
+    return rotateRight(root);
+  }
+  if (balance < -1 && key < root.right.value) {
+    root.right = rotateRight(root.right);
+    return rotateLeft(root);
+  }
+
+  return root;
+}
+
+function handleDelete() {
+  const val = parseInt(document.getElementById('deleteValue').value);
+  if (!isNaN(val)) {
+    avlRoot = deleteNode(avlRoot, val);
+    const treeContainer = document.getElementById('treeDisplay');
+    treeContainer.innerHTML = '';
+    treeContainer.appendChild(renderTree(avlRoot));
+    document.getElementById('deleteValue').value = '';
+  }
+}
+
+function getMinValueNode(node) {
+  let current = node;
+  while (current.left !== null) {
+    current = current.left;
+  }
+  return current;
+}
+
+function deleteNode(root, key) {
+  if (!root) return root;
+
+  if (key < root.value) root.left = deleteNode(root.left, key);
+  else if (key > root.value) root.right = deleteNode(root.right, key);
+  else {
+    if (!root.left || !root.right) {
+      root = root.left || root.right;
+    } else {
+      const temp = getMinValueNode(root.right);
+      root.value = temp.value;
+      root.right = deleteNode(root.right, temp.value);
+    }
+  }
+
+  if (!root) return root;
+  updateHeight(root);
+  const balance = getBalance(root);
+
+  if (balance > 1 && getBalance(root.left) >= 0) return rotateRight(root);
+  if (balance > 1 && getBalance(root.left) < 0) {
+    root.left = rotateLeft(root.left);
+    return rotateRight(root);
+  }
+  if (balance < -1 && getBalance(root.right) <= 0) return rotateLeft(root);
+  if (balance < -1 && getBalance(root.right) > 0) {
+    root.right = rotateRight(root.right);
+    return rotateLeft(root);
+  }
+  return root;
+}
+</script>
+
+<h2 id="rotations">AVL Rotations</h2>
+<p><strong>Problem Statement:</strong> Understand the 4 types of rotations used to maintain AVL Tree balance.</p>
+<div class="explanation">
+<strong>1. Left Left (LL):</strong> Rotate right.<br/>
+<strong>2. Right Right (RR):</strong> Rotate left.<br/>
+<strong>3. Left Right (LR):</strong> Left rotate child, then right rotate parent.<br/>
+<strong>4. Right Left (RL):</strong> Right rotate child, then left rotate parent.
+</div>
+    <h2 id="rotation-visuals">AVL Rotation Visual Demo</h2>
+<div class="explanation">Below are diagrams to help visualize how AVL rotations adjust the tree:</div>
+<pre><code>LL Rotation:
+     10          5
+    /           / \
+   5    =>     2  10
+  /
+ 2
+
+LR Rotation:
+     10          8
+    /           / \
+   5    =>     5  10
+    
+     8
+
+RR Rotation:
+     10            15
+       \           / \
+       15   =>   10  20
+         \
+         20
+
+RL Rotation:
+     10           12
+       \         /  \
+       15  =>   10  15
+      /
+    12</code></pre>
+
+<pre><code># Example for LL Rotation
+# Inserting 10, 5, 2
+root = None
+root = insert(root, 10)
+root = insert(root, 5)
+root = insert(root, 2)  # Triggers LL rotation
+
+# Example for LR Rotation
+# Inserting 10, 5, 8
+root = None
+root = insert(root, 10)
+root = insert(root, 5)
+root = insert(root, 8)  # Triggers LR rotation</code></pre>
+<div class="explanation">Time: O(log n) per insertion, Space: O(n) overall</div>
+    <h2 id="insertion">AVL Tree Insertion</h2>
+<div class="explanation">
+  <label for="insertValue">Enter value to insert:</label>
+  <input type="number" id="insertValue" />
+  <button onclick="handleInsert()">Insert</button>
+  <br> 
+<label for="deleteValue">Enter value to delete:</label>
+<input type="number" id="deleteValue" />
+<button onclick="handleDelete()">Delete</button>
+  
+  <div id="treeDisplay" style="margin-top: 20px;"></div>
+</div>
+<script>
+let avlRoot = null;
+
+function renderTree(node) {
+  const svgNS = 'http://www.w3.org/2000/svg';
+  const svg = document.createElementNS(svgNS, 'svg');
+  svg.setAttribute('width', '100%');
+  svg.setAttribute('height', '400');
+  let maxX = 0;
+
+  function draw(node, x, y, level, parentX = null, parentY = null) {
+    if (!node) return;
+
+    const nodeX = x;
+    const nodeY = y;
+    maxX = Math.max(maxX, nodeX);
+
+    // Draw edge
+    if (parentX !== null) {
+      const line = document.createElementNS(svgNS, 'line');
+      line.setAttribute('x1', parentX);
+      line.setAttribute('y1', parentY);
+      line.setAttribute('x2', nodeX);
+      line.setAttribute('y2', nodeY);
+      line.setAttribute('stroke', '#555');
+      svg.appendChild(line);
+    }
+
+    // Draw node
+    const circle = document.createElementNS(svgNS, 'circle');
+    circle.setAttribute('cx', nodeX);
+    circle.setAttribute('cy', nodeY);
+    circle.setAttribute('r', 15);
+    circle.setAttribute('fill', '#42a5f5');
+    circle.setAttribute('stroke', '#0d47a1');
+    svg.appendChild(circle);
+
+    const text = document.createElementNS(svgNS, 'text');
+    text.setAttribute('x', nodeX);
+    text.setAttribute('y', nodeY + 4);
+    text.setAttribute('text-anchor', 'middle');
+    text.setAttribute('font-size', '12');
+    text.setAttribute('fill', 'white');
+    text.textContent = node.value;
+    svg.appendChild(text);
+
+    draw(node.left, x - 100 / (level + 1), y + 60, level + 1, nodeX, nodeY);
+    draw(node.right, x + 100 / (level + 1), y + 60, level + 1, nodeX, nodeY);
+  }
+
+  draw(node, 400, 40, 1);
+  svg.setAttribute('width', Math.max(maxX + 100, 800));
+  return svg;
+}
+
+function handleInsert() {
+  const val = parseInt(document.getElementById('insertValue').value);
+  if (!isNaN(val)) {
+    avlRoot = insert(avlRoot, val);
+    const treeContainer = document.getElementById('treeDisplay');
+    treeContainer.innerHTML = '';
+    treeContainer.appendChild(renderTree(avlRoot));
+    document.getElementById('insertValue').value = '';
+  }
+}
+</script>
+    
+    
+<p><strong>Problem Statement:</strong> Insert a node into an AVL Tree and maintain the tree’s balance using appropriate rotations.</p>
+<div class="explanation">
+An insertion begins like in a regular BST. After placing the new node, the tree is rebalanced using LL, RR, LR, or RL rotations if needed.
+</div>
+<pre><code>def insert(root, key):
+    if not root:
+        return Node(key)
+    if key < root.value:
+        root.left = insert(root.left, key)
+    elif key > root.value:
+        root.right = insert(root.right, key)
+    else:
+        return root  # No duplicates
+
+    update_height(root)
+    balance = get_balance(root)
+
+    if balance > 1 and key < root.left.value:
+        return rotate_right(root)
+    if balance < -1 and key > root.right.value:
+        return rotate_left(root)
+    if balance > 1 and key > root.left.value:
+        root.left = rotate_left(root.left)
+        return rotate_right(root)
+    if balance < -1 and key < root.right.value:
+        root.right = rotate_right(root.right)
+        return rotate_left(root)
+
+    return root
+</code></pre>
+<div class="explanation">Time: O(log n) per insertion, Space: O(n) overall</div>
+
+
+
+
+
+
+
+    
+<h2 id="deletion">AVL Tree Deletion with Balancing</h2>
+<p><strong>Problem Statement:</strong> Delete a node from an AVL Tree and maintain balance by applying appropriate rotations.</p>
+<div class="explanation">
+Deletion follows standard BST delete logic, then rebalances the tree by updating height and applying rotations.</div>
+<pre><code>def delete(root, key):
+    if not root:
+        return root
+    if key < root.value:
+        root.left = delete(root.left, key)
+    elif key > root.value:
+        root.right = delete(root.right, key)
+    else:
+        if not root.left:
+            return root.right
+        elif not root.right:
+            return root.left
+        temp = get_min(root.right)
+        root.value = temp.value
+        root.right = delete(root.right, temp.value)
+
+    update_height(root)
+    balance = get_balance(root)
+
+    if balance > 1 and get_balance(root.left) >= 0:
+        return rotate_right(root)
+    if balance > 1 and get_balance(root.left) < 0:
+        root.left = rotate_left(root.left)
+        return rotate_right(root)
+    if balance < -1 and get_balance(root.right) <= 0:
+        return rotate_left(root)
+    if balance < -1 and get_balance(root.right) > 0:
+        root.right = rotate_right(root.right)
+        return rotate_left(root)
+
+    return root
+</code></pre>
+<div class="explanation">Time: O(log n) per deletion, Space: O(n) overall</div>
+
+
+</body>
+</html>

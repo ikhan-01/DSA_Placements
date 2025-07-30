@@ -1,0 +1,332 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Placement-Focused: Heaps & Priority Queues</title>
+  <link rel="stylesheet" href="cssDSA.css">
+</head>
+<body>
+  <div class="sidebar">
+  <h2>Navigation</h2>
+  <a href="#basics">Heap Basics</a>
+  <a href="#operations">Heap Operations</a>
+  <a href="#topk">Top-K Pattern</a>
+  <a href="#kth-largest">Kth Largest Element</a>
+  <a href="#top-k-frequent">Top K Frequent Elements</a>
+  <a href="#k-closest">K Closest Points to Origin</a>
+</div>
+
+  <div class="content" id="printable-content">
+  <button class="print-button" onclick="window.print()">🖨️ Print</button>
+  <h1 style="font-size: 28px; margin-bottom: 10px; color: #1e88e5;">Placement Preparation: Heaps & Priority Queues</h1>
+
+  <h2 id="basics">Heap Basics</h2>
+<p><strong>Concept:</strong> A heap is a complete binary tree stored in an array, where each node's position is determined by index relations: for a node at index i, its children are at 2i+1 and 2i+2, and parent at (i-1)//2.</p>
+<div class="testcase"><strong>Types:</strong> Min-Heap (used for Top-K Largest, Dijkstra) vs Max-Heap (used for Top-K Smallest, Priority Scheduling)</div>
+<div class="explanation">Min-Heap: root is the smallest; Max-Heap: root is the largest.</div>
+
+<div class="explanation">
+  <strong>Manual Heap Construction Example:</strong>
+  <pre><code># Given array:
+arr = [3, 1, 6, 5, 2, 4]
+
+# Heapify manually from the last non-leaf node
+# Start at index (n // 2) - 1 down to 0
+
+def heapify(arr, n, i):
+    smallest = i
+    l = 2 * i + 1
+    r = 2 * i + 2
+    if l < n and arr[l] < arr[smallest]:
+        smallest = l
+    if r < n and arr[r] < arr[smallest]:
+        smallest = r
+    if smallest != i:
+        arr[i], arr[smallest] = arr[smallest], arr[i]
+        heapify(arr, n, smallest)
+
+n = len(arr)
+for i in range(n//2 - 1, -1, -1):
+    heapify(arr, n, i)
+
+print("Heapified array:", arr)</code></pre>
+  <div class="markdown">Time: O(n) for building heap, Space: O(log n) recursive</div>
+</div>
+  <div class="explanation">Min-Heap: root is the smallest; Max-Heap: root is the largest.</div>
+
+  <h2 id="operations">Heap Operations</h2>
+<p>Practice the fundamental operations:</p>
+
+
+<div class="explanation">
+  <strong>Live Heap Playground:</strong>
+  <div style="margin-top:10px;">
+    <label><input type="checkbox" id="heapModeToggle" onchange="toggleHeapMode()"> Max-Heap Mode</label>
+  </div>
+  <br>
+  <label for="heapInput">Enter a number to insert into heap:</label>
+  <input type="number" id="heapInput" />
+  <button onclick="heapInsert()">Insert</button>
+  <button onclick="heapPop()">Pop Min</button>
+  <div style="margin-top:10px;"><strong>Heap Array:</strong> <span id="heapArrayDisplay">[]</span></div>
+  
+</div>
+<script>
+let minHeap = [];
+let isMaxHeap = false;
+
+function swap(arr, i, j) {
+  const temp = arr[i];
+  arr[i] = arr[j];
+  arr[j] = temp;
+}
+
+function siftUp(arr, idx) {
+  while (idx > 0) {
+    let parent = Math.floor((idx - 1) / 2);
+    if (arr[parent] > arr[idx]) {
+      swap(arr, parent, idx);
+      idx = parent;
+    } else break;
+  }
+}
+
+function siftDown(arr, idx) {
+  let n = arr.length;
+  while (true) {
+    let smallest = idx;
+    let left = 2 * idx + 1;
+    let right = 2 * idx + 2;
+    if (left < n && arr[left] < arr[smallest]) smallest = left;
+    if (right < n && arr[right] < arr[smallest]) smallest = right;
+    if (smallest !== idx) {
+      swap(arr, idx, smallest);
+      idx = smallest;
+    } else break;
+  }
+}
+
+function heapInsert() {
+  const val = parseInt(document.getElementById('heapInput').value);
+  if (!isNaN(val)) {
+    const actualVal = isMaxHeap ? -val : val;
+    minHeap.push(actualVal);
+    siftUp(minHeap, minHeap.length - 1);
+    updateHeapDisplay();
+    document.getElementById('heapInput').value = '';
+  }
+}
+
+function heapPop() {
+  if (minHeap.length === 0) return;
+  swap(minHeap, 0, minHeap.length - 1);
+  const popped = minHeap.pop();
+  siftDown(minHeap, 0);
+  updateHeapDisplay();
+}
+function updateHeapDisplay() {
+  const displayArray = isMaxHeap ? minHeap.map(v => -v) : minHeap.slice();
+  document.getElementById('heapArrayDisplay').textContent = JSON.stringify(displayArray);
+}
+
+function toggleHeapMode() {
+  const copy = minHeap.map(v => -v);
+  minHeap = copy;
+  isMaxHeap = !isMaxHeap;
+  siftDown(minHeap, 0);
+  updateHeapDisplay();
+}
+</script>
+
+  <h2 id="topk">Top-K Pattern</h2>
+  <p>Understand and practice maintaining a heap of size K to solve optimization problems efficiently:</p>
+  <ul>
+    <li>Use a Min-Heap to keep track of the K largest elements seen so far</li>
+    <li>Use a Max-Heap (by pushing negative values) to track the K smallest elements</li>
+  </ul>
+
+<h2 id="kth-largest">Kth Largest Element in an Array</h2>
+<p><strong>Problem:</strong> Find the Kth largest element in an unsorted array.</p>
+<div class="explanation">
+  <strong>Algorithm:</strong>
+  <ul>
+    <li>Use a Min-Heap of size K.</li>
+    <li>Push each element; if heap size exceeds K, remove the smallest.</li>
+    <li>The top of the heap will be the Kth largest.</li>
+  </ul>
+</div>
+<pre><code>import heapq
+
+def findKthLargest(nums, k):
+    heap = []
+    for n in nums:
+        heapq.heappush(heap, n)
+        if len(heap) > k:
+            heapq.heappop(heap)
+    return heap[0]</code></pre>
+<div class="markdown">Time: O(n log k), Space: O(k)</div>
+
+<h2 id="top-k-frequent">Top K Frequent Elements</h2>
+<p><strong>Problem:</strong> Return the K most frequent elements in an array.</p>
+<div class="explanation">
+  <strong>Algorithm:</strong>
+  <ul>
+    <li>Build a frequency map.</li>
+    <li>Use a Min-Heap of size K to track most frequent elements.</li>
+    <li>Heap stores pairs of (frequency, number).</li>
+  </ul>
+</div>
+<pre><code>from collections import Counter
+import heapq
+
+def topKFrequent(nums, k):
+    count = Counter(nums)
+    return [x for x, _ in heapq.nlargest(k, count.items(), key=lambda item: item[1])]</code></pre>
+<div class="markdown">Time: O(n log k), Space: O(n)</div>
+
+<h2 id="k-closest">K Closest Points to Origin</h2>
+<p><strong>Problem:</strong> Given a list of points on the plane, find the K closest to the origin (0, 0).</p>
+<div class="explanation">
+  <strong>Algorithm:</strong>
+  <ul>
+    <li>Calculate distance for each point using x² + y².</li>
+    <li>Use a Max-Heap of size K with negated distances.</li>
+    <li>If size exceeds K, remove farthest.</li>
+  </ul>
+</div>
+<pre><code>import heapq
+
+def kClosest(points, K):
+    heap = []
+    for (x, y) in points:
+        dist = -(x**2 + y**2)
+        heapq.heappush(heap, (dist, x, y))
+        if len(heap) > K:
+            heapq.heappop(heap)
+    return [(x, y) for (_, x, y) in heap]</code></pre>
+<div class="markdown">Time: O(n log k), Space: O(k)</div>
+
+
+<script>
+class Node {
+  constructor(value) {
+    this.value = value;
+    this.left = null;
+    this.right = null;
+    this.height = 1;
+  }
+}
+
+function height(node) {
+  return node ? node.height : 0;
+}
+
+function updateHeight(node) {
+  node.height = 1 + Math.max(height(node.left), height(node.right));
+}
+
+function getBalance(node) {
+  return node ? height(node.left) - height(node.right) : 0;
+}
+
+function rotateRight(y) {
+  const x = y.left;
+  const T2 = x.right;
+  x.right = y;
+  y.left = T2;
+  updateHeight(y);
+  updateHeight(x);
+  return x;
+}
+
+function rotateLeft(x) {
+  const y = x.right;
+  const T2 = y.left;
+  y.left = x;
+  x.right = T2;
+  updateHeight(x);
+  updateHeight(y);
+  return y;
+}
+
+function insert(root, key) {
+  if (!root) return new Node(key);
+  if (key < root.value) root.left = insert(root.left, key);
+  else if (key > root.value) root.right = insert(root.right, key);
+  else return root;
+
+  updateHeight(root);
+  const balance = getBalance(root);
+
+  if (balance > 1 && key < root.left.value) return rotateRight(root);
+  if (balance < -1 && key > root.right.value) return rotateLeft(root);
+  if (balance > 1 && key > root.left.value) {
+    root.left = rotateLeft(root.left);
+    return rotateRight(root);
+  }
+  if (balance < -1 && key < root.right.value) {
+    root.right = rotateRight(root.right);
+    return rotateLeft(root);
+  }
+
+  return root;
+}
+
+function handleDelete() {
+  const val = parseInt(document.getElementById('deleteValue').value);
+  if (!isNaN(val)) {
+    avlRoot = deleteNode(avlRoot, val);
+    const treeContainer = document.getElementById('treeDisplay');
+    treeContainer.innerHTML = '';
+    treeContainer.appendChild(renderTree(avlRoot));
+    document.getElementById('deleteValue').value = '';
+  }
+}
+
+function getMinValueNode(node) {
+  let current = node;
+  while (current.left !== null) {
+    current = current.left;
+  }
+  return current;
+}
+
+function deleteNode(root, key) {
+  if (!root) return root;
+
+  if (key < root.value) root.left = deleteNode(root.left, key);
+  else if (key > root.value) root.right = deleteNode(root.right, key);
+  else {
+    if (!root.left || !root.right) {
+      root = root.left || root.right;
+    } else {
+      const temp = getMinValueNode(root.right);
+      root.value = temp.value;
+      root.right = deleteNode(root.right, temp.value);
+    }
+  }
+
+  if (!root) return root;
+  updateHeight(root);
+  const balance = getBalance(root);
+
+  if (balance > 1 && getBalance(root.left) >= 0) return rotateRight(root);
+  if (balance > 1 && getBalance(root.left) < 0) {
+    root.left = rotateLeft(root.left);
+    return rotateRight(root);
+  }
+  if (balance < -1 && getBalance(root.right) <= 0) return rotateLeft(root);
+  if (balance < -1 && getBalance(root.right) > 0) {
+    root.right = rotateRight(root.right);
+    return rotateLeft(root);
+  }
+  return root;
+}
+</script>
+
+
+
+
+</body>
+</html>

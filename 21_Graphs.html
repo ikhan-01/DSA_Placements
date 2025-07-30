@@ -1,0 +1,354 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Placement-Focused: Graphs</title>
+  <link rel="stylesheet" href="cssDSA.css">
+</head>
+<body>
+  <div class="sidebar">
+  <h2>Navigation</h2>
+  <a href="#intro">Introduction to Graphs</a>
+  <a href="#build">Build Graph (List & Matrix)</a>
+  <a href="#bfs">BFS Traversals</a>
+  <a href="#dfs">DFS Traversals</a>
+  <a href="#shortest">Shortest Path (Unweighted)</a>
+  <a href="#components">Connected Components</a>
+  <a href="#cycle">Cycle Detection</a>
+  <a href="#coloring">Graph Coloring</a>
+</div>
+
+  <div class="content" id="printable-content">
+  <button class="print-button" onclick="window.print()">🖨️ Print</button>
+  <h1 style="font-size: 28px; margin-bottom: 10px; color: #1e88e5;">Placement Preparation: Graphs</h1>
+
+  <h2 id="intro">Graphs: Introduction</h2>
+<p>Graphs are used to model pairwise relationships between objects. They consist of vertices (nodes) and edges (connections).</p>
+<div class="testcase"><strong>Representations:</strong> Adjacency List (space efficient), Adjacency Matrix (constant lookup)</div>
+<div class="explanation">
+  - List: {0: [1, 2], 1: [0], 2: [0]} <br>
+  - Matrix: [[0,1,1], [1,0,0], [1,0,0]]
+</div>
+    <div class="explanation">
+  <h3>🧪 Interactive Graph Builder</h3>
+  <label>Node 1: <input type="number" id="uNode" /></label>
+  <label>Node 2: <input type="number" id="vNode" /></label>
+  <button onclick="addEdge(parseInt(uNode.value), parseInt(vNode.value))">Add Edge</button>
+  <canvas id="graphCanvas" width="400" height="400" style="border:1px solid #ccc; background:#fafafa; margin-top:10px;"></canvas>
+<br/>
+<label>Start Node for BFS: <input type="number" id="bfsStart" /></label>
+<button onclick="bfsVisual(parseInt(document.getElementById('bfsStart').value))">▶️ Visual BFS</button><br>
+<label>Start Node for DFS: <input type="number" id="dfsStart" /></label>
+<button onclick="dfsVisual(parseInt(document.getElementById('dfsStart').value))">▶️ Visual DFS</button>
+<button onclick="clearGraph()">🧹 Clear Graph</button>
+</div>
+
+<h2 id="build">Build Graph (List & Matrix)</h2>
+<div class="markdown">
+<b>Explanation:</b> <br>
+Graphs can be represented as:
+<ul>
+  <li><b>Adjacency List</b>: Space-efficient. Good for sparse graphs. O(1) time to access neighbors if list is built.</li>
+  <li><b>Adjacency Matrix</b>: Fast edge lookup (O(1)). Uses O(V²) space.</li>
+</ul>
+<b>Time Complexity:</b> O(V + E) for list creation, O(V²) for matrix.<br>
+<b>Space:</b> O(V + E) for list, O(V²) for matrix.
+</div>
+<pre><code># Adjacency List
+n = 3
+graph = [[] for _ in range(n)]
+graph[0].extend([1,2])
+graph[1].append(0)
+graph[2].append(0)
+
+# Adjacency Matrix
+matrix = [[0]*n for _ in range(n)]
+matrix[0][1] = matrix[0][2] = 1
+matrix[1][0] = matrix[2][0] = 1</code></pre>
+
+<h2 id="bfs">BFS: Level Order & Connected Components</h2>
+<div class="markdown">
+<b>Algorithm:</b> Breadth First Search explores nodes level by level using a queue.<br>
+<b>Time Complexity:</b> O(V + E) <br>
+<b>Use Cases:</b> Level traversal, shortest path (unweighted), component count.
+</div>
+<pre><code>from collections import deque
+
+def bfs(graph, start):
+    visited = set()
+    q = deque([start])
+    visited.add(start)
+    while q:
+        node = q.popleft()
+        print(node, end=' ')
+        for nei in graph[node]:
+            if nei not in visited:
+                visited.add(nei)
+                q.append(nei)</code></pre>
+
+<h2 id="dfs">DFS: Recursive & Component Count</h2>
+<div class="markdown">
+<b>Algorithm:</b> Depth First Search explores as far as possible before backtracking. Works recursively or using stack.<br>
+<b>Time Complexity:</b> O(V + E)<br>
+<b>Use Cases:</b> Cycle detection, connected components, topological sort (directed).
+</div>
+<pre><code>def dfs(graph, node, visited):
+    visited.add(node)
+    for nei in graph[node]:
+        if nei not in visited:
+            dfs(graph, nei, visited)</code></pre>
+
+<h2 id="shortest">Shortest Path in Unweighted Graph</h2>
+<div class="testcase">
+<strong>Problem Statement:</strong><br>
+Given an unweighted graph represented as an adjacency list and a source node, return the shortest distance from the source to all other nodes. If a node is unreachable, mark its distance as -1.
+</div>
+<div class="markdown">
+<strong>🔗 Practice:</strong>
+<ul>
+  <li><a href="https://leetcode.com/problems/as-far-from-land-as-possible/" target="_blank">Leetcode: As Far from Land as Possible</a></li>
+  <li><a href="https://www.geeksforgeeks.org/shortest-path-unweighted-graph/" target="_blank">GFG: Shortest Path in Unweighted Graph</a></li>
+</ul>
+</div>
+<div class="markdown">
+<b>Algorithm:</b> Use BFS starting from source. Track distances with an array initialized to -1.<br>
+<b>Time Complexity:</b> O(V + E)<br>
+<b>Space:</b> O(V) for distance array.<br>
+<b>Use Cases:</b> Shortest distance between two nodes in unweighted graphs.
+</div>
+<pre><code>from collections import deque
+
+def shortest_path(graph, src):
+    dist = [-1]*len(graph)
+    dist[src] = 0
+    q = deque([src])
+    while q:
+        node = q.popleft()
+        for nei in graph[node]:
+            if dist[nei] == -1:
+                dist[nei] = dist[node] + 1
+                q.append(nei)</code></pre>
+
+<h2 id="components">Connected Components Count</h2>
+<div class="testcase">
+<strong>Problem Statement:</strong><br>
+You are given an undirected graph. Find the number of connected components in the graph.
+</div>
+<div class="markdown">
+<strong>🔗 Practice:</strong>
+<ul>
+  <li><a href="https://leetcode.com/problems/number-of-connected-components-in-an-undirected-graph/" target="_blank">Leetcode: Number of Connected Components</a></li>
+  <li><a href="https://www.geeksforgeeks.org/connected-components-in-an-undirected-graph/" target="_blank">GFG: Connected Components</a></li>
+</ul>
+</div>
+<div class="markdown">
+<b>Algorithm:</b> Use DFS/BFS from unvisited nodes and count each traversal.<br>
+<b>Time Complexity:</b> O(V + E)<br>
+<b>Use Cases:</b> Determine the number of isolated subgraphs.
+</div>
+<pre><code>def count_components(graph):
+    visited = set()
+    count = 0
+    for node in range(len(graph)):
+        if node not in visited:
+            dfs(graph, node, visited)
+            count += 1
+    return count</code></pre>
+
+<h2 id="cycle">Cycle Detection (Undirected)</h2>
+<div class="testcase">
+<strong>Problem Statement:</strong><br>
+Determine whether the given undirected graph contains any cycle. Return true if a cycle is found, false otherwise.
+</div>
+<div class="markdown">
+<strong>🔗 Practice:</strong>
+<ul>
+  <li><a href="https://www.geeksforgeeks.org/detect-cycle-undirected-graph/" target="_blank">GFG: Detect Cycle in Undirected Graph</a></li>
+</ul>
+</div>
+<div class="markdown">
+<b>Algorithm:</b> DFS with parent tracking. If a visited neighbor isn’t the parent, a cycle exists.<br>
+<b>Time Complexity:</b> O(V + E)<br>
+<b>Use Cases:</b> Detecting loops in undirected graphs (e.g., checking if a graph is a tree).
+</div>
+<pre><code>def has_cycle(graph, node, visited, parent):
+    visited.add(node)
+    for nei in graph[node]:
+        if nei not in visited:
+            if has_cycle(graph, nei, visited, node):
+                return True
+        elif nei != parent:
+            return True
+    return False</code></pre>
+
+<h2 id="coloring">Graph Coloring (2-colorable)</h2>
+<div class="testcase">
+<strong>Problem Statement:</strong><br>
+Check if the given graph is bipartite (2-colorable), i.e., if it's possible to color all nodes with two colors such that no two adjacent nodes share the same color.
+</div>
+<div class="markdown">
+<strong>🔗 Practice:</strong>
+<ul>
+  <li><a href="https://leetcode.com/problems/is-graph-bipartite/" target="_blank">Leetcode: Is Graph Bipartite?</a></li>
+  <li><a href="https://www.geeksforgeeks.org/bipartite-graph/" target="_blank">GFG: Bipartite Graph</a></li>
+</ul>
+</div>
+<div class="markdown">
+<b>Algorithm:</b> Attempt to color graph using two colors (0 and 1) via DFS or BFS.<br>
+<b>Time Complexity:</b> O(V + E)<br>
+<b>Use Cases:</b> Bipartite graph check, scheduling without conflicts.
+</div>
+<pre><code>def is_bipartite(graph):
+    color = {}
+    for node in range(len(graph)):
+        if node not in color:
+            stack = [node]
+            color[node] = 0
+            while stack:
+                u = stack.pop()
+                for v in graph[u]:
+                    if v in color:
+                        if color[v] == color[u]:
+                            return False
+                    else:
+                        color[v] = 1 - color[u]
+                        stack.append(v)
+    return True</code></pre>
+
+<script>
+// --- Interactive Graph Builder (Undirected) ---
+const graphData = {};
+function addEdge(u, v) {
+  u = String(u);
+  v = String(v);
+  if (!(u in graphData)) graphData[u] = [];
+  if (!(v in graphData)) graphData[v] = [];
+  graphData[u].push(v);
+  graphData[v].push(u);
+  renderGraph();
+}
+
+function renderGraph() {
+  const canvas = document.getElementById('graphCanvas');
+  if (!canvas) return;
+  const ctx = canvas.getContext('2d');
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  const keys = Object.keys(graphData);
+  const positions = {};
+  keys.forEach((node, i) => {
+    const angle = (2 * Math.PI * i) / keys.length;
+    const x = 200 + 150 * Math.cos(angle);
+    const y = 200 + 150 * Math.sin(angle);
+    positions[node] = { x, y };
+  });
+  keys.forEach(node => {
+    graphData[node].forEach(nei => {
+      if (+node < +nei) {
+        ctx.beginPath();
+        ctx.moveTo(positions[node].x, positions[node].y);
+        ctx.lineTo(positions[nei].x, positions[nei].y);
+        ctx.stroke();
+      }
+    });
+  });
+  keys.forEach(node => {
+    const { x, y } = positions[node];
+    ctx.beginPath();
+    ctx.arc(x, y, 20, 0, 2 * Math.PI);
+    ctx.fillStyle = '#4caf50';
+    ctx.fill();
+    ctx.stroke();
+    ctx.fillStyle = '#fff';
+    ctx.fillText(node, x, y);
+  });
+}
+// --- BFS Visual ---
+function bfsVisual(start) {
+  start = String(start);
+  const visited = new Set();
+  const queue = [start];
+  const delay = ms => new Promise(res => setTimeout(res, ms));
+  const order = [];
+
+  async function animate() {
+    while (queue.length) {
+      const node = queue.shift();
+      if (visited.has(node)) continue;
+      visited.add(node);
+      order.push(node);
+      renderGraph(order);
+      await delay(700);
+      for (let nei of graphData[node] || []) {
+        if (!visited.has(nei)) queue.push(nei);
+      }
+    }
+  }
+  animate();
+}
+
+// --- DFS Visual ---
+function dfsVisual(start) {
+  start = String(start);
+  const visited = new Set();
+  const delay = ms => new Promise(res => setTimeout(res, ms));
+  const order = [];
+
+  async function dfs(node) {
+    visited.add(node);
+    order.push(node);
+    renderGraph(order);
+    await delay(700);
+    for (let nei of graphData[node] || []) {
+      if (!visited.has(nei)) await dfs(nei);
+    }
+  }
+  dfs(start);
+}
+
+// --- Clear Graph ---
+function clearGraph() {
+  for (const key in graphData) delete graphData[key];
+  renderGraph();
+}
+
+// Enhanced render to show highlights
+function renderGraph(highlight = []) {
+  const canvas = document.getElementById('graphCanvas');
+  if (!canvas) return;
+  const ctx = canvas.getContext('2d');
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  const keys = Object.keys(graphData);
+  const positions = {};
+  keys.forEach((node, i) => {
+    const angle = (2 * Math.PI * i) / keys.length;
+    const x = 200 + 150 * Math.cos(angle);
+    const y = 200 + 150 * Math.sin(angle);
+    positions[node] = { x, y };
+  });
+  keys.forEach(node => {
+    graphData[node].forEach(nei => {
+      if (+node < +nei) {
+        ctx.beginPath();
+        ctx.moveTo(positions[node].x, positions[node].y);
+        ctx.lineTo(positions[nei].x, positions[nei].y);
+        ctx.stroke();
+      }
+    });
+  });
+  keys.forEach(node => {
+    const { x, y } = positions[node];
+    ctx.beginPath();
+    ctx.arc(x, y, 20, 0, 2 * Math.PI);
+    ctx.fillStyle = highlight.includes(node) ? '#f44336' : '#4caf50';
+    ctx.fill();
+    ctx.stroke();
+    ctx.fillStyle = '#fff';
+    ctx.fillText(node, x, y);
+  });
+}
+</script>
+
+
+</body>
+</html>

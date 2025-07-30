@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Placement-Focused: BSTs</title>
+  <link rel="stylesheet" href="cssDSA.css">
+</head>
+<body>
+  <div class="sidebar">
+    <h2>BST Topics</h2>
+    <a href="#basics">BST Basics Operations</a>
+    <a href="#recursive">Recursive Traversals</a>
+
+    <a href="#insert">Insert in BST</a>
+    <a href="#delete">Delete from BST</a>
+    
+  </div>
+
+  <div class="content" id="printable-content">
+    <button class="print-button" onclick="window.print()">🖨️ Print</button>
+    <h1 style="font-size: 28px; margin-bottom: 10px; color: #1e88e5;">Placement Preparation: BSTs</h1>
+
+    <div class="markdown">
+      <strong>🌳 Interactive BST Visualization</strong><br />
+      <div style="display: flex; flex-wrap: wrap; gap: 10px; align-items: center;">
+        <input type="number" id="bst-input" placeholder="Enter value" style="padding: 6px; width: 150px;" />
+        <button onclick="insertHandler()">Insert</button>
+        <button onclick="deleteHandler()">Delete</button>
+        <button onclick="inorderHandler()">Inorder</button>
+        <button onclick="preorderHandler()">Preorder</button>
+        <button onclick="postorderHandler()">Postorder</button>
+      </div>
+      <div id="bst-output" style="margin-top: 15px; font-weight: bold; font-size: 16px; color: #33691e;"></div>
+      <strong>🧩 BST Structure:</strong>
+      <div id="tree-visual" style="margin-top: 20px; display: flex; justify-content: center; align-items: center; overflow-x: auto; border: 1px solid #ccc; background: #fff; padding: 20px; border-radius: 10px; min-height: 250px; width: 100%; box-sizing: border-box;"></div>
+    </div>
+  </div>
+
+  <script>
+    class Node {
+      constructor(value) {
+        this.value = value;
+        this.left = null;
+        this.right = null;
+      }
+    }
+
+    let root = null;
+
+    function insert(root, key) {
+      if (!root) return new Node(key);
+      if (key < root.value) root.left = insert(root.left, key);
+      else root.right = insert(root.right, key);
+      return root;
+    }
+
+    function deleteNode(root, key) {
+      if (!root) return root;
+      if (key < root.value) root.left = deleteNode(root.left, key);
+      else if (key > root.value) root.right = deleteNode(root.right, key);
+      else {
+        if (!root.left) return root.right;
+        if (!root.right) return root.left;
+        let minLargerNode = root.right;
+        while (minLargerNode.left) minLargerNode = minLargerNode.left;
+        root.value = minLargerNode.value;
+        root.right = deleteNode(root.right, minLargerNode.value);
+      }
+      return root;
+    }
+
+    function inorder(node, result = []) {
+      if (!node) return result;
+      inorder(node.left, result);
+      result.push(node.value);
+      inorder(node.right, result);
+      return result;
+    }
+
+    function preorder(node, result = []) {
+      if (!node) return result;
+      result.push(node.value);
+      preorder(node.left, result);
+      preorder(node.right, result);
+      return result;
+    }
+
+    function postorder(node, result = []) {
+      if (!node) return result;
+      postorder(node.left, result);
+      postorder(node.right, result);
+      result.push(node.value);
+      return result;
+    }
+
+    function renderTree(node, x = 400, y = 40, level = 0, svg = []) {
+      if (!node) return;
+      const gapX = 70 * Math.pow(0.9, level);
+      const gapY = 70;
+      const thisX = x;
+      const thisY = y;
+
+      if (node.left) {
+        const childX = x - gapX;
+        const childY = y + gapY;
+        svg.push(`<line x1='${thisX}' y1='${thisY}' x2='${childX}' y2='${childY}' stroke='black'/>`);
+        renderTree(node.left, childX, childY, level + 1, svg);
+      }
+
+      if (node.right) {
+        const childX = x + gapX;
+        const childY = y + gapY;
+        svg.push(`<line x1='${thisX}' y1='${thisY}' x2='${childX}' y2='${childY}' stroke='black'/>`);
+        renderTree(node.right, childX, childY, level + 1, svg);
+      }
+
+      svg.push(`<circle cx='${thisX}' cy='${thisY}' r='15' fill='#90caf9' stroke='black'/>`);
+      svg.push(`<text x='${thisX - 5}' y='${thisY + 4}' font-size='12'>${node.value}</text>`);
+    }
+
+    function updateTreeVisual() {
+      const svgParts = [];
+      renderTree(root, 400, 40, 0, svgParts);
+      const svgCode = `<svg viewBox='0 0 1000 500' style='width: 100%; height: auto;'>${svgParts.join('')}</svg>`;
+      document.getElementById('tree-visual').innerHTML = svgCode;
+    }
+
+    function insertHandler() {
+      const val = parseInt(document.getElementById('bst-input').value);
+      if (!isNaN(val)) {
+        root = insert(root, val);
+        document.getElementById('bst-output').textContent = `Inserted ${val}`;
+        updateTreeVisual();
+      }
+    }
+
+    function deleteHandler() {
+      const val = parseInt(document.getElementById('bst-input').value);
+      if (!isNaN(val)) {
+        root = deleteNode(root, val);
+        document.getElementById('bst-output').textContent = `Deleted ${val}`;
+        updateTreeVisual();
+      }
+    }
+
+    function inorderHandler() {
+      const output = inorder(root).join(' ');
+      document.getElementById('bst-output').textContent = `Inorder: ${output}`;
+      updateTreeVisual();
+    }
+
+    function preorderHandler() {
+      const output = preorder(root).join(' ');
+      document.getElementById('bst-output').textContent = `Preorder: ${output}`;
+      updateTreeVisual();
+    }
+
+    function postorderHandler() {
+      const output = postorder(root).join(' ');
+      document.getElementById('bst-output').textContent = `Postorder: ${output}`;
+      updateTreeVisual();
+    }
+  </script>
+</body>
+</html>

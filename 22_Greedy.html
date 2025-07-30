@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Placement-Focused: Greedy & Dynamic Optimization</title>
+  <link rel="stylesheet" href="cssDSA.css">
+</head>
+<body>
+  <div class="sidebar">
+  <h2>Optimization Topics</h2>
+  <a href="#greedy">Greedy Approach</a>
+  <a href="#greedy-usecases">Use Cases</a>
+  <a href="#greedy-problems">Greedy Problems</a>
+  <a href="#activity-selection">&nbsp;&nbsp;• Activity Selection</a>
+  <a href="#fractional-knapsack">&nbsp;&nbsp;• Fractional Knapsack</a>
+  <a href="#job-sequencing">&nbsp;&nbsp;• Job Sequencing</a>
+  <a href="#min-platforms">&nbsp;&nbsp;• Minimum Platforms</a>
+  <a href="#huffman">&nbsp;&nbsp;• Huffman Encoding</a>
+</div>
+  <div class="content" id="printable-content">
+    <button class="print-button" onclick="window.print()">🖨️ Print</button>
+    <h1 style="font-size: 28px; margin-bottom: 10px; color: #1e88e5;">Placement Preparation: Optimization Techniques</h1>
+
+    <h2 id="greedy">Greedy Approach</h2>
+    <p>The greedy method builds up a solution piece by piece, always choosing the next piece that offers the most immediate benefit. It doesn't always give an optimal solution, but works for many optimization problems.</p>
+    <div class="explanation">
+      <b>Time Complexity:</b> Typically O(n log n) due to sorting<br>
+      <b>Space Complexity:</b> Usually O(1) or O(n), depending on the algorithm<br>
+      <b>Strategy:</b> Make a locally optimal choice at each step
+    </div>
+
+    <h2 id="greedy-usecases">Greedy Algorithm Use Cases</h2>
+    <ul>
+      <li>Activity Selection Problem</li>
+      <li>Fractional Knapsack</li>
+      <li>Job Sequencing with Deadlines</li>
+      <li>Minimum Spanning Tree (Prim’s & Kruskal’s)</li>
+      <li>Huffman Coding</li>
+    </ul>
+
+    <h2 id="greedy-problems">Top 5 Greedy Problems</h2>
+
+    <h3 id="activity-selection">1. Activity Selection</h3>
+    <p><b>Problem:</b> You are given N activities with their start and finish times. Select the maximum number of activities that can be performed by a single person assuming that a person can only work on a single activity at a time.</p>
+    <p><a href="https://www.geeksforgeeks.org/activity-selection-problem-greedy-algo-1/" target="_blank">🔗 GFG Problem Link</a></p>
+    <p><a href="https://leetcode.com/problems/maximum-number-of-events-that-can-be-attended/" target="_blank">🔗 LeetCode Equivalent</a> <span style='color:green'>(Medium)</span></p>
+    <pre><code># Sort by end time, select if start ≥ last selected end
+def activity_selection(start, end):
+    activities = sorted(zip(start, end), key=lambda x: x[1])
+    count, last_end = 0, -1
+    for s, e in activities:
+        if s >= last_end:
+            count += 1
+            last_end = e
+    return count</code></pre>
+    <div class="explanation"><b>Time:</b> O(n log n), <b>Space:</b> O(1)</div>
+
+    <h3 id="fractional-knapsack">2. Fractional Knapsack</h3>
+    <p><b>Problem:</b> Given weights and values of N items, and a knapsack with capacity W, find the maximum value you can put in the knapsack if you can take fractional amounts of items.</p>
+    <p><a href="https://www.geeksforgeeks.org/fractional-knapsack-problem/" target="_blank">🔗 GFG Problem Link</a></p>
+    <p><a href="https://leetcode.com/problems/maximum-units-on-a-truck/" target="_blank">🔗 LeetCode Equivalent</a> <span style='color:green'>(Medium)</span></p>
+    <pre><code>def fractional_knapsack(wt, val, W):
+    ratio = sorted(zip(val, wt), key=lambda x: -x[0]/x[1])
+    total = 0
+    for v, w in ratio:
+        if W >= w:
+            total += v
+            W -= w
+        else:
+            total += v * (W / w)
+            break
+    return total</code></pre>
+    <div class="explanation"><b>Time:</b> O(n log n), <b>Space:</b> O(1)</div>
+
+    <h3 id="job-sequencing">3. Job Sequencing</h3>
+    <p><b>Problem:</b> Given N jobs where each job has a deadline and a profit. Maximize the total profit if only one job can be scheduled at a time before its deadline.</p>
+    <p><a href="https://www.geeksforgeeks.org/job-scheduling-problem/" target="_blank">🔗 GFG Problem Link</a></p>
+    <p><a href="https://practice.geeksforgeeks.org/problems/job-sequencing-problem-1587115620/1" target="_blank">🔗 GFG Practice</a> <span style='color:orange'>(Medium)</span></p>
+    <pre><code>def job_scheduling(jobs):
+    jobs.sort(key=lambda x: x[1], reverse=True)
+    max_deadline = max(j[0] for j in jobs)
+    slot = [False]*max_deadline
+    profit = 0
+    for d, p in jobs:
+        for i in range(d-1, -1, -1):
+            if not slot[i]:
+                slot[i] = True
+                profit += p
+                break
+    return profit</code></pre>
+
+    <h3 id="min-platforms">4. Minimum Number of Platforms</h3>
+    <p><b>Problem:</b> Given arrival and departure times of all trains that reach a railway station, find the minimum number of platforms required for the railway station so that no train waits.</p>
+    <p><a href="https://www.geeksforgeeks.org/minimum-number-platforms-required-railwaystation/" target="_blank">🔗 GFG Problem Link</a></p>
+    <p><a href="https://practice.geeksforgeeks.org/problems/minimum-platforms-1587115620/1" target="_blank">🔗 GFG Practice</a> <span style='color:orange'>(Medium)</span></p>
+    <pre><code>def min_platforms(arr, dep):
+    arr.sort(); dep.sort()
+    plat_needed, result, i, j = 0, 0, 0, 0
+    while i < len(arr):
+        if arr[i] <= dep[j]:
+            plat_needed += 1
+            i += 1
+        else:
+            plat_needed -= 1
+            j += 1
+        result = max(result, plat_needed)
+    return result</code></pre>
+
+    <h3 id="huffman">5. Huffman Encoding</h3>
+    <p><b>Problem:</b> Given characters and their frequencies, build a Huffman tree and generate prefix codes such that no code is a prefix of another and the overall encoding is optimal.</p>
+    <p><a href="https://www.geeksforgeeks.org/huffman-coding-greedy-algo-3/" target="_blank">🔗 GFG Problem Link</a></p>
+    <p><a href="https://practice.geeksforgeeks.org/problems/huffman-encoding3345/1" target="_blank">🔗 GFG Practice</a> <span style='color:red'>(Hard)</span></p>
+    <pre><code>import heapq
+
+def huffman(freq):
+    heap = [[w, [sym, ""]] for sym, w in freq.items()]
+    heapq.heapify(heap)
+    while len(heap) > 1:
+        lo = heapq.heappop(heap)
+        hi = heapq.heappop(heap)
+        for p in lo[1:]: p[1] = '0' + p[1]
+        for p in hi[1:]: p[1] = '1' + p[1]
+        heapq.heappush(heap, [lo[0] + hi[0]] + lo[1:] + hi[1:])
+    return sorted(heap[0][1:], key=lambda x: (len(x[-1]), x))</code></pre>
+
+    
+  </div>
+</body>
+</html>

@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Placement-Focused: Greedy & Dynamic Optimization</title>
+  <link rel="stylesheet" href="cssDSA.css">
+</head>
+<body>
+  <div class="sidebar">
+  <h2>Dynamic Programming</h2>
+  <a href="#dp-intro">What is DP?</a>
+  <a href="#dp-techniques">Techniques</a>
+  <a href="#dp-problems">DP Problems</a>
+  <a href="#fib">• Fibonacci</a>
+  <a href="#lcs">• Longest Common Subsequence</a>
+  <a href="#0-1-knapsack">• 0/1 Knapsack</a>
+  <a href="#edit-distance">• Edit Distance</a>
+  <a href="#coin-change">• Coin Change</a>
+</div>
+  <div class="content" id="printable-content">
+    <button class="print-button" onclick="window.print()">🖨️ Print</button>
+    <h1 style="font-size: 28px; margin-bottom: 10px; color: #1e88e5;">Placement Preparation: Dynamic Programming (DP)</h1>
+    <h2 id="dp-intro">What is Dynamic Programming?</h2>
+    <p>Dynamic Programming (DP) is an optimization technique that solves complex problems by breaking them into overlapping subproblems, storing results to avoid redundant computations.</p>
+    <div class="explanation">
+      <b>When to Use:</b> Overlapping subproblems + Optimal substructure<br>
+      <b>Approaches:</b> Top-down (memoization) and Bottom-up (tabulation)
+    </div>
+
+    <h2 id="dp-techniques">Techniques in DP</h2>
+<div class="explanation">
+  <h3>1. Recursive + Memoization</h3>
+  <p>This approach solves the problem recursively and stores the result of each subproblem (memoization) to avoid redundant calls.</p>
+  <pre><code>fib = [-1]*100
+
+def fibonacci(n):
+    if n <= 1:
+        return n
+    if fib[n] != -1:
+        return fib[n]
+    fib[n] = fibonacci(n-1) + fibonacci(n-2)
+    return fib[n]</code></pre>
+  <p><b>Use Case:</b> Fibonacci, LCS, Edit Distance</p>
+
+  <h3>2. Tabulation (Iterative Bottom-Up)</h3>
+  <p>Build the solution from base cases upwards, filling a DP table iteratively.</p>
+  <pre><code>def fibonacci(n):
+    dp = [0] * (n+1)
+    dp[1] = 1
+    for i in range(2, n+1):
+        dp[i] = dp[i-1] + dp[i-2]
+    return dp[n]</code></pre>
+  <p><b>Use Case:</b> Coin Change, 0/1 Knapsack</p>
+
+  <h3>3. State Representation</h3>
+  <p>Identify how to define subproblems: dp[i], dp[i][j], etc., representing partial solutions.</p>
+  <p><b>Examples:</b></p>
+  <ul>
+    <li>dp[i] = min coins to form amount i</li>
+    <li>dp[i][j] = LCS length for first i characters of A and first j of B</li>
+  </ul>
+
+  <h3>4. Transition Relations (Recurrence)</h3>
+  <p>This is the mathematical relation between states. For example, for LCS:</p>
+  <pre><code>if A[i] == B[j]:
+    dp[i][j] = dp[i-1][j-1] + 1
+else:
+    dp[i][j] = max(dp[i-1][j], dp[i][j-1])</code></pre>
+  <p>Building the correct recurrence is the heart of a DP solution.</p>
+</div>
+
+    <h2 id="dp-problems">Top 5 Dynamic Programming Problems</h2>
+
+    <h3 id="fib">1. Fibonacci Numbers</h3>
+<p><b>Problem:</b> Return the Nth Fibonacci number.</p>
+<p><a href="https://leetcode.com/problems/fibonacci-number/" target="_blank">🔗 LeetCode</a> <span style='color:green'>(Easy)</span></p>
+<p><b>Time Complexity:</b> O(n)<br><b>Space Complexity:</b> O(n) for memoization array</p>
+    <pre><code># Memoization
+fib = [-1]*100
+def fibonacci(n):
+    if n <= 1:
+        return n
+    if fib[n] != -1:
+        return fib[n]
+    fib[n] = fibonacci(n-1) + fibonacci(n-2)
+    return fib[n]</code></pre>
+
+    <h3 id="lcs">2. Longest Common Subsequence</h3>
+<p><b>Problem:</b> Given two strings, find the length of their longest common subsequence.</p>
+<p><a href="https://leetcode.com/problems/longest-common-subsequence/" target="_blank">🔗 LeetCode</a> <span style='color:orange'>(Medium)</span></p>
+<p><b>Time Complexity:</b> O(m × n)<br><b>Space Complexity:</b> O(m × n)</p>
+    <pre><code>def lcs(X, Y):
+    m, n = len(X), len(Y)
+    dp = [[0]*(n+1) for _ in range(m+1)]
+    for i in range(1, m+1):
+        for j in range(1, n+1):
+            if X[i-1] == Y[j-1]:
+                dp[i][j] = dp[i-1][j-1] + 1
+            else:
+                dp[i][j] = max(dp[i-1][j], dp[i][j-1])
+    return dp[m][n]</code></pre>
+
+    <h3 id="0-1-knapsack">3. 0/1 Knapsack</h3>
+<p><b>Problem:</b> Given weights and values of items, determine the maximum value you can carry in a bag of capacity W.</p>
+<p><a href="https://practice.geeksforgeeks.org/problems/0-1-knapsack-problem0945/1" target="_blank">🔗 GFG</a> <span style='color:orange'>(Medium)</span></p>
+<p><b>Time Complexity:</b> O(n × W)<br><b>Space Complexity:</b> O(n × W)</p>
+    <pre><code>def knapsack(W, wt, val, n):
+    dp = [[0]*(W+1) for _ in range(n+1)]
+    for i in range(1, n+1):
+        for w in range(1, W+1):
+            if wt[i-1] <= w:
+                dp[i][w] = max(val[i-1] + dp[i-1][w-wt[i-1]], dp[i-1][w])
+            else:
+                dp[i][w] = dp[i-1][w]
+    return dp[n][W]</code></pre>
+
+    <h3 id="edit-distance">4. Edit Distance</h3>
+<p><b>Problem:</b> Find the minimum number of insertions, deletions and replacements to convert one string to another.</p>
+<p><a href="https://leetcode.com/problems/edit-distance/" target="_blank">🔗 LeetCode</a> <span style='color:red'>(Hard)</span></p>
+<p><b>Time Complexity:</b> O(m × n)<br><b>Space Complexity:</b> O(m × n)</p>
+    <pre><code>def edit_distance(s1, s2):
+    m, n = len(s1), len(s2)
+    dp = [[0]*(n+1) for _ in range(m+1)]
+    for i in range(m+1):
+        for j in range(n+1):
+            if i == 0:
+                dp[i][j] = j
+            elif j == 0:
+                dp[i][j] = i
+            elif s1[i-1] == s2[j-1]:
+                dp[i][j] = dp[i-1][j-1]
+            else:
+                dp[i][j] = 1 + min(dp[i][j-1], dp[i-1][j], dp[i-1][j-1])
+    return dp[m][n]</code></pre>
+
+    <h3 id="coin-change">5. Coin Change</h3>
+<p><b>Problem:</b> Given coin denominations and a total amount, compute the minimum coins required to form that amount.</p>
+<p><a href="https://leetcode.com/problems/coin-change/" target="_blank">🔗 LeetCode</a> <span style='color:orange'>(Medium)</span></p>
+<p><b>Time Complexity:</b> O(amount × n)<br><b>Space Complexity:</b> O(amount)</p>
+    <pre><code>def coin_change(coins, amount):
+    dp = [float('inf')] * (amount+1)
+    dp[0] = 0
+    for coin in coins:
+        for i in range(coin, amount+1):
+            dp[i] = min(dp[i], dp[i-coin]+1)
+    return dp[amount] if dp[amount] != float('inf') else -1</code></pre>
+    
+    
+  </div>
+</body>
+</html>

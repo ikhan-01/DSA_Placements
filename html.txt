@@ -1,0 +1,353 @@
+<!-- Updated 15Trees.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Placement-Focused: Trees</title>
+  <style>
+    body {
+      margin: 0;
+      font-family: 'Segoe UI', sans-serif;
+      display: flex;
+      height: 100vh;
+    }
+    .sidebar {
+      width: 250px;
+      background-color: #1e1e2f;
+      color: white;
+      padding: 20px;
+      box-sizing: border-box;
+      position: fixed;
+      height: 100vh;
+      overflow-y: auto;
+    }
+    .sidebar h2 {
+      margin-top: 0;
+      font-size: 20px;
+    }
+    .sidebar a {
+      display: block;
+      color: #cfcfcf;
+      text-decoration: none;
+      margin: 10px 0;
+      transition: color 0.2s ease;
+    }
+    .sidebar a:hover {
+      color: #ffffff;
+    }
+    .content {
+      flex: 1;
+      padding: 30px 30px 30px 280px;
+      overflow-y: auto;
+    }
+    .content h2 {
+      margin-top: 60px;
+      border-bottom: 2px solid #ccc;
+      padding-bottom: 5px;
+    }
+    pre {
+      background: #f4f4f4;
+      padding: 15px;
+      overflow-x: auto;
+      border-radius: 6px;
+    }
+    .explanation {
+      background: #e8f0fe;
+      padding: 10px;
+      border-left: 4px solid #4285f4;
+      margin: 20px 0;
+      border-radius: 6px;
+    }
+    .print-button {
+      position: sticky;
+      bottom: 5px;
+      float: right;
+      padding: 8px 14px;
+      background-color: #007bff;
+      color: #fff;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      margin-top: 10px;
+    }
+    @media print {
+      body * {
+        visibility: hidden;
+      }
+      #printable-content, #printable-content * {
+        visibility: visible;
+      }
+      #printable-content {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: auto;
+        overflow: visible;
+      }
+      .print-button {
+        display: none;
+      }
+    }
+    .testcase {
+      background: #fff8e1;
+      padding: 8px;
+      border-left: 4px solid #ffa000;
+      margin-top: 10px;
+      border-radius: 4px;
+    }
+    .markdown {
+      background-color: #fefefe;
+      border-left: 4px solid #4caf50;
+      padding: 10px;
+      font-family: monospace;
+      margin: 20px 0;
+    }
+  </style>
+</head>
+<body>
+  <div class="sidebar">
+    <h2>Tree Topics</h2>
+    <a href="#basics">Tree Basics</a>
+    <a href="#recursive">Recursive Traversals</a>
+    <a href="#iterative">Iterative Traversals & BFS</a>
+    <a href="#height">Height of Tree</a>
+    <a href="#search">Search in BST</a>
+    <a href="#insert">Insert in BST</a>
+    <a href="#lca">Lowest Common Ancestor</a>
+    <a href="#diameter">Diameter of Tree</a>
+    <a href="#mirror">Mirror Tree</a>
+  </div>
+
+  <div class="content" id="printable-content">
+    <button class="print-button" onclick="window.print()">🖨️ Print</button>
+    <h1 style="font-size: 28px; margin-bottom: 10px;">Placement Preparation: Trees</h1>
+
+    <h2 id="basics">Tree Basics</h2>
+    <p><strong>Problem Statement:</strong> Understand tree structures, types, and how to construct a tree in code.</p>
+    <div class="testcase"><strong>Tree Types:</strong> Binary, Full, Complete, Perfect, Balanced, Binary Search Tree (BST)</div>
+    <pre><code>class Node:
+    def __init__(self, value):
+        self.value = value
+        self.left = None
+        self.right = None
+
+# Manual creation
+root = Node(1)
+root.left = Node(2)
+root.right = Node(3)
+root.left.left = Node(4)
+root.left.right = Node(5)</code></pre>
+    <div class="explanation">Time: O(1) per node creation, Space: O(n) for n nodes.</div>
+
+    <div class="markdown">
+📚 <strong>Interactive Tree Visualization</strong><br />
+<div id="interactive-tree" style="margin-top: 20px;"></div>
+<input type="text" id="inputNode" placeholder="Enter node value" />
+<button onclick="addNode()">Add Node</button>
+<button onclick="inorderTraversal()">Inorder</button>
+<button onclick="preorderTraversal()">Preorder</button>
+<button onclick="postorderTraversal()">Postorder</button>
+<pre id="traversalOutput"></pre>
+</div>
+
+    <h2 id="recursive">Tree Traversals (Recursive)</h2>
+    <p><strong>Problem Statement:</strong> Traverse the tree using Inorder, Preorder, and Postorder recursively.</p>
+    <pre><code># Recursive traversals
+
+def inorder(root):
+    if root:
+        inorder(root.left)
+        print(root.value, end=' ')
+
+def preorder(root):
+    if root:
+        print(root.value, end=' ')
+        preorder(root.left)
+        preorder(root.right)
+
+def postorder(root):
+    if root:
+        postorder(root.left)
+        postorder(root.right)
+        print(root.value, end=' ')</code></pre>
+    <div class="explanation">Time: O(n), Space: O(h) where h = height of tree (recursion stack).</div>
+
+    <h2 id="iterative">Iterative Traversals & BFS</h2>
+    <div class="markdown">
+📚 <strong>Interactive BFS Traversal</strong><br />
+<div id="bfs-tree" style="margin-top: 20px;"></div>
+<button onclick="bfsTraversal()">Level Order Traversal (BFS)</button>
+<pre id="bfsOutput"></pre>
+</div>
+
+    <h2 id="height">Height of Tree</h2>
+    <p><strong>Problem Statement:</strong> Find the height (or depth) of the binary tree.</p>
+    <pre><code>def height(root):
+    if not root:
+        return 0
+    return 1 + max(height(root.left), height(root.right))</code></pre>
+    <div class="explanation">Time: O(n), Space: O(h)</div>
+
+    <h2 id="search">Search in BST</h2>
+    <p><strong>Problem Statement:</strong> Given a BST and a key, determine whether the key exists in the tree.</p>
+    <pre><code>def search_bst(root, key):
+    if not root or root.value == key:
+        return root
+    if key < root.value:
+        return search_bst(root.left, key)
+    return search_bst(root.right)</code></pre>
+    <div class="explanation">Time: O(h), Space: O(h)</div>
+
+    <h2 id="insert">Insert in BST</h2>
+    <p><strong>Problem Statement:</strong> Insert a new value into the BST while maintaining the BST property.</p>
+    <pre><code>def insert_bst(root, key):
+    if not root:
+        return Node(key)
+    if key < root.value:
+        root.left = insert_bst(root.left, key)
+    else:
+        root.right = insert_bst(root.right, key)
+    return root</code></pre>
+    <div class="explanation">Time: O(h), Space: O(h)</div>
+
+    <h2 id="lca">Lowest Common Ancestor</h2>
+    <p><strong>Problem Statement:</strong> Given a BST and two nodes, return their lowest common ancestor.</p>
+    <pre><code>def lca(root, n1, n2):
+    if not root:
+        return None
+    if root.value > max(n1, n2):
+        return lca(root.left, n1, n2)
+    elif root.value < min(n1, n2):
+        return lca(root.right, n1, n2)
+    return root</code></pre>
+    <div class="explanation">Time: O(h), Space: O(h)</div>
+
+    <h2 id="diameter">Diameter of Tree</h2>
+    <p><strong>Problem Statement:</strong> Find the longest path between any two nodes in the tree.</p>
+    <pre><code>def diameter(root):
+    diameter = 0
+    def dfs(node):
+        nonlocal diameter
+        if not node:
+            return 0
+        left = dfs(node.left)
+        right = dfs(node.right)
+        diameter = max(diameter, left + right)
+        return 1 + max(left, right)
+    dfs(root)
+    return diameter</code></pre>
+    <div class="explanation">Time: O(n), Space: O(h)</div>
+
+    <h2 id="mirror">Mirror Tree</h2>
+    <p><strong>Problem Statement:</strong> Convert a binary tree into its mirror form by swapping all left and right children.</p>
+    <pre><code>def mirror_tree(root):
+    if root:
+        root.left, root.right = mirror_tree(root.right), mirror_tree(root.left)
+    return root</code></pre>
+    <div class="explanation">Time: O(n), Space: O(h)</div>
+
+    <script>
+      // Tree visualizer + traversals
+      class TreeNode {
+        constructor(value) {
+          this.value = value;
+          this.left = null;
+          this.right = null;
+        }
+      }
+
+      let root = new TreeNode(1);
+      root.left = new TreeNode(2);
+      root.right = new TreeNode(3);
+      root.left.left = new TreeNode(4);
+      root.left.right = new TreeNode(5);
+
+      function renderTreeSVG(node, x = 250, y = 20, gap = 100, svg = '') {
+        if (!node) return svg;
+        if (node.left)
+          svg += `<line x1='${x}' y1='${y}' x2='${x - gap}' y2='${y + 60}' stroke='black'/>`;
+        if (node.right)
+          svg += `<line x1='${x}' y1='${y}' x2='${x + gap}' y2='${y + 60}' stroke='black'/>`;
+        svg += `<circle cx='${x}' cy='${y}' r='14' fill='#90caf9' stroke='black'/>
+                <text x='${x - 5}' y='${y + 4}' font-size='12'>${node.value}</text>`;
+        if (node.left) svg = renderTreeSVG(node.left, x - gap, y + 60, gap / 1.5, svg);
+        if (node.right) svg = renderTreeSVG(node.right, x + gap, y + 60, gap / 1.5, svg);
+        return svg;
+      }
+
+      function displayTree() {
+        document.getElementById('interactive-tree').innerHTML =
+          `<svg width='600' height='300'>${renderTreeSVG(root)}</svg>`;
+      }
+
+      function addNode() {
+        const val = parseInt(document.getElementById('inputNode').value);
+        if (!val) return;
+        function insert(r, v) {
+          if (!r) return new TreeNode(v);
+          if (v < r.value) r.left = insert(r.left, v);
+          else r.right = insert(r.right, v);
+          return r;
+        }
+        root = insert(root, val);
+        displayTree();
+        document.getElementById('inputNode').value = '';
+      }
+
+      function inorderTraversal() {
+        const result = [];
+        function dfs(n) {
+          if (!n) return;
+          dfs(n.left);
+          result.push(n.value);
+          dfs(n.right);
+        }
+        dfs(root);
+        document.getElementById('traversalOutput').innerText = 'Inorder: ' + result.join(', ');
+      }
+
+      function preorderTraversal() {
+        const result = [];
+        function dfs(n) {
+          if (!n) return;
+          result.push(n.value);
+          dfs(n.left);
+          dfs(n.right);
+        }
+        dfs(root);
+        document.getElementById('traversalOutput').innerText = 'Preorder: ' + result.join(', ');
+      }
+
+      function postorderTraversal() {
+        const result = [];
+        function dfs(n) {
+          if (!n) return;
+          dfs(n.left);
+          dfs(n.right);
+          result.push(n.value);
+        }
+        dfs(root);
+        document.getElementById('traversalOutput').innerText = 'Postorder: ' + result.join(', ');
+      }
+
+      function bfsTraversal() {
+        const queue = [];
+        const result = [];
+        if (!root) return;
+        queue.push(root);
+        while (queue.length > 0) {
+          const node = queue.shift();
+          result.push(node.value);
+          if (node.left) queue.push(node.left);
+          if (node.right) queue.push(node.right);
+        }
+        document.getElementById('bfsOutput').innerText = 'Level Order: ' + result.join(', ');
+      }
+
+      displayTree();
+    </script>
+  </div>
+</body>
+</html>

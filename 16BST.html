@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Placement-Focused: BSTs</title>
+  <link rel="stylesheet" href="cssDSA.css">
+</head>
+<body>
+  <div class="sidebar">
+    <h2>BST Topics</h2>
+    <a href="#basics">BST Basics</a>
+    <a href="#recursive">Recursive Traversals</a>
+    <a href="#iterative">Iterative Traversals & BFS</a>
+    <a href="#height">Height of BST</a>
+    <a href="#search">Search in BST</a>
+    <a href="#insert">Insert in BST</a>
+    <a href="#delete">Delete from BST</a>
+    <a href="#lca">Lowest Common Ancestor in BST</a>
+  </div>
+
+  <div class="content" id="printable-content">
+    <button class="print-button" onclick="window.print()">🖨️ Print</button>
+    <h1 >Placement Preparation: BSTs</h1>
+
+    <h2 id="basics">BST Basics</h2>
+<p><strong>Problem Statement:</strong> Understand Binary Search Tree structure, BST properties, and how to construct a BST in code.</p>
+<div class="testcase"><strong>BST Properties:</strong> Left child < value, Right child > value. Unique elements assumed.</div>
+<pre><code>class Node:
+    def __init__(self, value):
+        self.value = value
+        self.left = None
+        self.right = None
+
+# Manual BST creation
+root = Node(10)
+root.left = Node(5)
+root.right = Node(15)
+root.left.left = Node(2)
+root.left.right = Node(7)</code></pre>
+<div class="explanation">Time: O(1) per node creation, Space: O(n) for n nodes.</div>
+
+<h2 id="recursive">Recursive Traversals (BST)</h2>
+<p><strong>Problem Statement:</strong> Traverse the BST using Inorder, Preorder, and Postorder recursively.</p>
+<pre><code># Recursive traversals
+
+def inorder(root):
+    if root:
+        inorder(root.left)
+        print(root.value, end=' ')
+
+def preorder(root):
+    if root:
+        print(root.value, end=' ')
+        preorder(root.left)
+        preorder(root.right)
+
+def postorder(root):
+    if root:
+        postorder(root.left)
+        postorder(root.right)
+        print(root.value, end=' ')</code></pre>
+<div class="explanation">Time: O(n), Space: O(h) where h = height of BST (recursion stack).</div>
+
+<h2 id="iterative">Iterative Traversals & BFS (BST)</h2>
+<p><strong>Problem Statement:</strong> Use stacks and queues to traverse BST iteratively.</p>
+<pre><code># Example: Level Order
+from collections import deque
+
+def level_order(root):
+    if not root:
+        return []
+    q = deque([root])
+    while q:
+        node = q.popleft()
+        print(node.value, end=' ')
+        if node.left:
+            q.append(node.left)
+        if node.right:
+            q.append(node.right)</code></pre>
+
+<h2 id="height">Height of BST</h2>
+<p><strong>Problem Statement:</strong> Find the height (or depth) of the Binary Search Tree.</p>
+<pre><code>def height(root):
+    if not root:
+        return 0
+    return 1 + max(height(root.left), height(root.right))</code></pre>
+
+<h2 id="search">Search in BST</h2>
+<p><strong>Problem Statement:</strong> Given a BST and a key, determine whether the key exists in the BST.</p>
+<pre><code>def search_bst(root, key):
+    if not root or root.value == key:
+        return root
+    if key < root.value:
+        return search_bst(root.left, key)
+    return search_bst(root.right)</code></pre>
+
+<h2 id="insert">Insert in BST</h2>
+<p><strong>Problem Statement:</strong> Insert a new value into the BST while maintaining the BST property.</p>
+<pre><code>def insert_bst(root, key):
+    if not root:
+        return Node(key)
+    if key < root.value:
+        root.left = insert_bst(root.left, key)
+    else:
+        root.right = insert_bst(root.right, key)
+    return root</code></pre>
+
+    <h2 id="delete">Delete from BST</h2>
+    <p><strong>Problem Statement:</strong> Delete a node from the BST and maintain the BST properties.</p>
+    <pre><code>def delete_bst(root, key):
+    if not root:
+        return root
+    if key < root.value:
+        root.left = delete_bst(root.left, key)
+    elif key > root.value:
+        root.right = delete_bst(root.right, key)
+    else:
+        # Node with only one child or no child
+        if not root.left:
+            return root.right
+        elif not root.right:
+            return root.left
+        
+        # Node with two children:
+        # Get the inorder successor (smallest in the right subtree)
+        successor = root.right
+        while successor.left:
+            successor = successor.left
+        root.value = successor.value
+        root.right = delete_bst(root.right, successor.value)
+    return root</code></pre>
+    <div class="explanation">Time: O(h), Space: O(h). Deletion requires handling 3 cases: leaf, one child, and two children.</div>
+
+    <!-- Final utility sections and LCA follow below -->
+
+    <h2 id="example">Example Usage of BST</h2>
+    <p><strong>Visualize:</strong> Here’s how insert, search, and delete operations work together in a BST.</p>
+    <pre><code># Full usage example
+values = [20, 10, 30, 5, 15, 25, 35]
+root = None
+for val in values:
+    root = insert_bst(root, val)
+
+print("Search 15:", search_bst(root, 15) is not None)
+root = delete_bst(root, 10)
+print("Inorder traversal after deleting 10:")
+inorder(root)</code></pre>
+    <div class="explanation">This example inserts multiple nodes, searches a key, deletes one, and prints the final BST using inorder traversal.</div>
+    <h2 id="lca">Lowest Common Ancestor in BST</h2>
+    <p><strong>Problem Statement:</strong> Given a BST and two nodes, return their lowest common ancestor.</p>
+    <pre><code>def lca(root, n1, n2):
+    if not root:
+        return None
+    if root.value > max(n1, n2):
+        return lca(root.left, n1, n2)
+    elif root.value < min(n1, n2):
+        return lca(root.right, n1, n2)
+    return root</code></pre>
+  </div>
+  <script>
+    // Toggle collapsible sections
+    document.querySelectorAll('.content h2').forEach(h => {
+      h.style.cursor = 'pointer';
+      h.addEventListener('click', () => {
+        let next = h.nextElementSibling;
+        while (next && next.tagName !== 'H2') {
+          next.style.display = next.style.display === 'none' ? '' : 'none';
+          next = next.nextElementSibling;
+        }
+      });
+    });
+
+  </script>
+</body>
+</html>
